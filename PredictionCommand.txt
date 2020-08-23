@@ -1,0 +1,2 @@
+# Directory TLEFile NumObjects NumLineSeg TimeWindow EpochYear Mon Day Hour Min Sec 
+C:\Skyfire\Voronoing\Dynamique\Space_track\history_200717\ TLE_200717_4990.tle 10 1000 7200 2020 07 17 0 0 0 
