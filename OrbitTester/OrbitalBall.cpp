@@ -1,5 +1,6 @@
 #include "OrbitalBall.h"
 #include "rg_Point2D.h"
+#include <iostream>
 
 #include <vector>
 
@@ -16,6 +17,9 @@ OrbitalBall::OrbitalBall(int ID, int numSegments, cSatellite* satellite, cJulian
 	m_satellite = satellite;
 	m_localEpoch = localEpoch;
 	initialize_replica(numSegments);
+
+	m_coordOfPerigee = calculate_coord_of_perigee();
+	update_circular_approximation(m_startPointOfLineSegment, m_endPointOfLineSegment);
 }
 
 
@@ -47,9 +51,23 @@ OrbitalBall& OrbitalBall::operator=(const OrbitalBall& rhs)
 void OrbitalBall::copy(const OrbitalBall& rhs)
 {
 	m_ID = rhs.m_ID;
+	m_time = rhs.m_time;
+	m_coord = rhs.m_coord;
+	m_velocity = rhs.m_velocity;
 	m_satellite = rhs.m_satellite;
 	m_numSegments = rhs.m_numSegments;
 	m_localEpoch = rhs.m_localEpoch;
+
+	//For replica info
+	m_startTimeOfLinearApprox = rhs.m_startTimeOfLinearApprox;
+	m_secondsPerSegment = rhs.m_secondsPerSegment;
+	m_startPointOfLineSegment = rhs.m_startPointOfLineSegment;
+	m_endPointOfLineSegment = rhs.m_endPointOfLineSegment;
+
+	m_centerOfCircularApprox = rhs.m_centerOfCircularApprox;
+	m_coordOfPerigee = rhs.m_coordOfPerigee;
+	m_radiusOfCircularArc = rhs.m_radiusOfCircularArc;
+	m_ThetaC = rhs.m_ThetaC;
 }
 
 
@@ -63,15 +81,13 @@ void OrbitalBall::clear()
 void OrbitalBall::initialize_replica(int numSegments)
 {
 	m_numSegments = numSegments;
+	m_secondsPerSegment = calculate_seconds_per_segment();
 
 	m_startTimeOfLinearApprox = calculate_segment_start_time(m_time);
-	m_secondsPerSegment = calculate_seconds_per_segment();
-	m_startPointOfLineSegment = calculate_point_on_orbit_at_time(m_startTimeOfLinearApprox);
-	m_endPointOfLineSegment = calculate_point_on_orbit_at_time(m_startTimeOfLinearApprox + m_secondsPerSegment);
+	m_startPointOfLineSegment = calculate_point_on_Kepler_orbit_at_time(m_startTimeOfLinearApprox);
+	m_endPointOfLineSegment = calculate_point_on_Kepler_orbit_at_time(m_startTimeOfLinearApprox + m_secondsPerSegment);
 	m_coord = calculate_replica_position_at_time(m_time);
 	initialize_velocity();
-
-	calculate_center_coord_of_circular_approximation(m_startPointOfLineSegment, m_endPointOfLineSegment);
 }
 
 
@@ -83,7 +99,7 @@ void OrbitalBall::change_num_segments(int numSegments)
 
 
 
-rg_Point3D OrbitalBall::calculate_point_on_orbit_at_time(double time) const
+rg_Point3D OrbitalBall::calculate_point_on_Kepler_orbit_at_time(double time) const
 {
 	cJulian targetTime = *m_localEpoch;
 	targetTime.AddSec(time);
@@ -110,17 +126,15 @@ double OrbitalBall::calculate_segment_start_time(double time) const
 	cJulian julianTime(*m_localEpoch);
 	julianTime.AddSec(time);
 	double secondsFromPerigee = calculate_seconds_from_perigee(julianTime);
-	//cout << "Seconds from perigee: " << secondsFromPerigee << endl;
-	double secondsPerSegment = calculate_seconds_per_segment();
 
 	double nextSegmentTransitionTimeFromPerigee = 0.0;
 	while (nextSegmentTransitionTimeFromPerigee < secondsFromPerigee)
-		nextSegmentTransitionTimeFromPerigee += secondsPerSegment;
+		nextSegmentTransitionTimeFromPerigee += m_secondsPerSegment;
 
 	//cout << "Next segment transition time: " << nextSegmentTransitionTimeFromPerigee << endl;
 
 	double nextSegmentTransitionTimeFromLocalEpoch = nextSegmentTransitionTimeFromPerigee - calculate_seconds_from_perigee_to_local_epoch();
-	return nextSegmentTransitionTimeFromLocalEpoch - secondsPerSegment;
+	return nextSegmentTransitionTimeFromLocalEpoch - m_secondsPerSegment;
 }
 
 
@@ -140,25 +154,68 @@ double OrbitalBall::calculate_seconds_from_perigee_to_local_epoch() const
 
 
 
-void OrbitalBall::calculate_center_coord_of_circular_approximation(const rg_Point3D& pt0, const rg_Point3D& pt1)
+void OrbitalBall::update_circular_approximation(const rg_Point3D& pt0, const rg_Point3D& pt1)
 {
-	//1. Coord of Perigee
-	double secondsFromPerigeeToLocalEpoch = calculate_seconds_from_perigee_to_local_epoch();
-	rg_Point3D perigeeCoord = calculate_point_on_orbit_at_time(-secondsFromPerigeeToLocalEpoch);
-
 	//2. True anomaly of start point / end point
-	double angle0 = perigeeCoord.angle(pt0);
-	double angle1 = perigeeCoord.angle(pt1);
+	double angle0 = m_coordOfPerigee.angle(pt0);
+	double angle1 = m_coordOfPerigee.angle(pt1);
 
 	//3. Compute delta
 	double r0 = pt0.magnitude();
 	double r1 = pt1.magnitude();
 	double delta = 0.5 * (pow(r1, 2) - pow(r0, 2)) / (r1 * cos(angle1) - r0 * cos(angle0));
-	m_centerOfCircularApprox = perigeeCoord.getUnitVector() * delta;
+	m_centerOfCircularApprox = m_coordOfPerigee.getUnitVector() * delta;
+
+	//For debug
+	double distance0 = m_centerOfCircularApprox.distance(pt0);
+	double distance1 = m_centerOfCircularApprox.distance(pt1);
+	if (abs(distance0 - distance1) > 1)
+		cout << "Wrong center of circular approx!" << endl;
 
 	//4. Compute radius
-	double insideSqrt = pow(r0, 2) * (pow(cos(angle0), 2) - 1) + pow(delta, 2);
-	double radius = r0 * cos(angle0) + sqrt(insideSqrt);
+	double insideSqrt = pow(r0, 2) + pow(delta, 2) - 2 * r0 * delta * cos(angle0);
+	m_radiusOfCircularArc = sqrt(insideSqrt);
+
+	//For debug
+	if (abs(m_radiusOfCircularArc - distance0) > 1)
+		cout << "Wrong radius of circular approx!" << endl;
+
+	//5. Compute ThetaC
+	rg_Point3D vec0 = m_startPointOfLineSegment - m_centerOfCircularApprox;
+	rg_Point3D vec1 = m_endPointOfLineSegment - m_centerOfCircularApprox;
+	m_ThetaC = vec0.angle(vec1);
+}
+
+rg_Point3D OrbitalBall::calculate_coord_of_perigee()
+{
+	double secondsFromPerigeeToLocalEpoch = calculate_seconds_from_perigee_to_local_epoch();
+	rg_Point3D perigeeCoord = calculate_point_on_Kepler_orbit_at_time(-secondsFromPerigeeToLocalEpoch);
+	return perigeeCoord;
+}
+
+
+
+rg_Point3D OrbitalBall::calculate_coord_of_circular_replica_at_time(const double& time)
+{
+	double tau = (time - m_startTimeOfLinearApprox) / m_secondsPerSegment;
+	rg_Point3D coordOfCircularReplica = calculate_coord_of_circular_replica_at_tau(tau);
+	return coordOfCircularReplica;
+}
+
+
+
+rg_Point3D OrbitalBall::calculate_coord_of_circular_replica_at_tau(const double& tau)
+{
+	rg_Point3D vec0 = (m_startPointOfLineSegment - m_centerOfCircularApprox).getUnitVector();
+	rg_Point3D vec1 = (m_endPointOfLineSegment - m_centerOfCircularApprox).getUnitVector();
+
+	rg_Point3D zAxis = vec0.crossProduct(vec1).getUnitVector();
+	rg_Point3D yAxis = zAxis.crossProduct(vec0).getUnitVector();
+
+	double angle = tau * m_ThetaC;
+	rg_Point3D coordOfCircularReplica = m_centerOfCircularApprox + m_radiusOfCircularArc *(cos(angle) * vec0 + sin(angle) * yAxis);
+	
+	return coordOfCircularReplica;
 }
 
 
@@ -182,37 +239,20 @@ float OrbitalBall::calculate_max_approximation_error()
 
 
 
-void OrbitalBall::change_velocity(const bool& isForward)
-{	
-	if (isForward == true)
-	{
-		move_to_next_segment();
-	}
-	else
-	{
-		move_to_prev_segment();
-	}
-}
-
-
-
 void OrbitalBall::move_to_next_segment()
 {
-	double secondsPerSegment = calculate_seconds_per_segment();
-	rg_Point3D nextPoint = calculate_point_on_orbit_at_time(m_time + secondsPerSegment);
-	rg_Point3D velocity = (nextPoint - get_coord()) / secondsPerSegment;
-	set_velocity(velocity);
+	m_startTimeOfLinearApprox = m_startTimeOfLinearApprox + m_secondsPerSegment;
+
+	m_startPointOfLineSegment = calculate_point_on_Kepler_orbit_at_time(m_startTimeOfLinearApprox);
+	m_endPointOfLineSegment = calculate_point_on_Kepler_orbit_at_time(m_startTimeOfLinearApprox+m_secondsPerSegment);
+
+	m_coord = m_startPointOfLineSegment;
+	initialize_velocity();
+
+	update_circular_approximation(m_startPointOfLineSegment, m_endPointOfLineSegment);
 }
 
 
-
-void OrbitalBall::move_to_prev_segment()
-{
-	double secondsPerSegment = calculate_seconds_per_segment();
-	rg_Point3D lastPoint = calculate_point_on_orbit_at_time(m_time - secondsPerSegment);
-	rg_Point3D velocity = (get_coord() - lastPoint) / secondsPerSegment;
-	set_velocity(velocity);
-}
 
 rg_Point3D OrbitalBall::calculate_position_at_time(double time) const
 {

@@ -29,7 +29,9 @@ protected:
 	rg_Point3D m_endPointOfLineSegment;
 
 	rg_Point3D m_centerOfCircularApprox;
+	rg_Point3D m_coordOfPerigee;
 	double m_radiusOfCircularArc;
+	double m_ThetaC;
 
 public:
 	OrbitalBall();
@@ -51,6 +53,9 @@ public:
 	inline int get_num_segments() const { return m_numSegments; }
 	inline cJulian* get_epoch() const { return m_localEpoch; }
 
+	//Replica related functions
+	inline double get_next_segment_transition_time() const { return m_startTimeOfLinearApprox + m_secondsPerSegment; }
+
 	inline void set_ID(int ID) { m_ID = ID; }
 	inline void set_time(double time) { m_time = time; }
 	inline void set_coord(const rg_Point3D& coord) { m_coord = coord; }
@@ -59,7 +64,7 @@ public:
 	void initialize_replica(int numSegments);
 	void change_num_segments(int numSegments);
 
-	rg_Point3D calculate_point_on_orbit_at_time(double time) const;
+	rg_Point3D calculate_point_on_Kepler_orbit_at_time(double time) const;
 	rg_Point3D calculate_replica_position_at_time(double time) const;
 	double calculate_segment_start_time(double time) const;
 
@@ -69,16 +74,16 @@ public:
 	double calculate_seconds_from_perigee_to_local_epoch() const;
 	
 	//For Circular Approximation
-	void calculate_center_coord_of_circular_approximation(const rg_Point3D& pt0, const rg_Point3D& pt1);
-
+	void update_circular_approximation(const rg_Point3D& pt0, const rg_Point3D& pt1);
+	rg_Point3D calculate_coord_of_perigee();
+	rg_Point3D calculate_coord_of_circular_replica_at_time(const double& time);
+	rg_Point3D calculate_coord_of_circular_replica_at_tau(const double& tau);
 
 
 	float calculate_max_approximation_error();
 
 	inline void initialize_velocity() { m_velocity = (m_endPointOfLineSegment - m_startPointOfLineSegment) / m_secondsPerSegment; }
-	virtual void change_velocity(const bool& isForward);
 	void	move_to_next_segment();
-	void move_to_prev_segment();
 
 	rg_Point3D calculate_position_at_time(double time) const;
 

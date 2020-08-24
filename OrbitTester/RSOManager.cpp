@@ -14,7 +14,7 @@ void RSOManager::clear()
 void RSOManager::initialize_RSO_manager(const PredictionCommand& command)
 {
 	string filePath = command.directory + command.tleFile;
-	load_two_line_element_set_file(filePath, command.numLineSegments);
+	load_two_line_element_set_file(filePath, command.numObject);
 
 	int index = BEGINNING_ID_OF_ORBIT_BALL;
 	m_numSegments = command.numLineSegments;
@@ -22,8 +22,8 @@ void RSOManager::initialize_RSO_manager(const PredictionCommand& command)
 
 	for (auto& satellite : m_satellites)
 	{
-		m_orbitalBalls.push_back(OrbitalBall(index, m_numSegments, &satellite, &m_epoch));
-		m_mapFromIDToOrbitalBall[stoi(m_orbitalBalls.back().get_satellite()->Orbit().SatId())] = &m_orbitalBalls.back();
+		m_RSOs.push_back(OrbitalBall(index, m_numSegments, &satellite, &m_epoch));
+		m_mapFromIDToOrbitalBall[stoi(m_RSOs.back().get_satellite()->Orbit().SatId())] = &m_RSOs.back();
 		index++;
 	}
 }
@@ -58,18 +58,12 @@ void RSOManager::load_two_line_element_set_file(const string& filePath, const in
 
 
 
-void RSOManager::initialize_orbital_simulator(int numSegments, cJulian& epoch, const double& timeWindow)
-{
-	
-}
-
-
 
 OrbitalBall* RSOManager::find_RSO_that_has_eccentricity_similar_to_given(const double& targetEccentricity)
 {
 	OrbitalBall* ballWithClosestEccentricity = nullptr;
 	double minEccentricityDifference = DBL_MAX;
-	for (auto& ball : m_orbitalBalls)
+	for (auto& ball : m_RSOs)
 	{
 		double eccentricity = ball.get_satellite()->Orbit().Eccentricity();
 		double difference = abs(eccentricity - targetEccentricity);
