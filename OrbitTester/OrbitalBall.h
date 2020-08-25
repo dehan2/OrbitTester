@@ -79,6 +79,10 @@ public:
 	rg_Point3D calculate_coord_of_circular_replica_at_time(const double& time);
 	rg_Point3D calculate_coord_of_circular_replica_at_tau(const double& tau);
 
+	pair<double, double> calculate_max_L2K_and_L2C_error_for_current_line_segment(int numSample);
+	double calculate_max_L2K_error_for_current_line_segment(int numSample);
+	double calculate_max_L2C_error_for_current_line_segment(int numSample);
+
 
 	float calculate_max_approximation_error();
 

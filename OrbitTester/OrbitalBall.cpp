@@ -220,6 +220,57 @@ rg_Point3D OrbitalBall::calculate_coord_of_circular_replica_at_tau(const double&
 
 
 
+pair<double, double> OrbitalBall::calculate_max_L2K_and_L2C_error_for_current_line_segment(int numSample)
+{
+	double maxL2K = calculate_max_L2K_error_for_current_line_segment(numSample);
+	double maxL2C = calculate_max_L2C_error_for_current_line_segment(numSample);
+	return make_pair(maxL2K, maxL2C);
+}
+
+
+
+double OrbitalBall::calculate_max_L2K_error_for_current_line_segment(int numSample)
+{
+	double maxDistance = 0;
+
+	for (int i = 1; i < numSample; i++)
+	{
+		double targetTime = m_startTimeOfLinearApprox + m_secondsPerSegment * (double)i / numSample;
+		rg_Point3D coordOnKepler = calculate_point_on_Kepler_orbit_at_time(targetTime);
+		rg_Point3D coordOfReplica = calculate_replica_position_at_time(targetTime);
+
+		double distanceL2K = coordOnKepler.distance(coordOfReplica);
+
+		if (distanceL2K > maxDistance)
+			maxDistance = distanceL2K;
+	}
+
+	return maxDistance;
+}
+
+
+
+double OrbitalBall::calculate_max_L2C_error_for_current_line_segment(int numSample)
+{
+	double maxDistance = 0;
+
+	for (int i = 1; i < numSample; i++)
+	{
+		double targetTime = m_startTimeOfLinearApprox + m_secondsPerSegment * (double)i / numSample;
+		rg_Point3D coordOfReplica = calculate_replica_position_at_time(targetTime);
+		rg_Point3D coordOfCircularReplica = calculate_coord_of_circular_replica_at_time(targetTime);
+
+		double distanceL2C = coordOfReplica.distance(coordOfCircularReplica);
+
+		if (distanceL2C > maxDistance)
+			maxDistance = distanceL2C;
+	}
+
+	return maxDistance;
+}
+
+
+
 double OrbitalBall::calculate_seconds_from_perigee(const cJulian& t) const
 {
 	double secondsFromLocalEpoch = calculate_seconds_from_local_epoch(t);
@@ -232,7 +283,7 @@ double OrbitalBall::calculate_seconds_from_perigee(const cJulian& t) const
 float OrbitalBall::calculate_max_approximation_error()
 {
 	float maxApproximationError = 0;
-	//180322 - ¾î¶»°Ô ÇÒ±î...»ý°¢ÇØº¸ÀÚ
+	//180322 - ï¿½î¶»ï¿½ï¿½ ï¿½Ò±ï¿½...ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½
 
 	return maxApproximationError;
 }
@@ -303,7 +354,7 @@ float OrbitalBall::calculate_positional_error()
 
 
 
-	//180322 - SGP4¿¡ ¸Â°Ô ¼öÁ¤ÇÊ¿ä. ¾î¶»°Ô ÇÒÁö »ý°¢ÇØº¸ÀÚ
+	//180322 - SGP4ï¿½ï¿½ ï¿½Â°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ê¿ï¿½. ï¿½î¶»ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½
 	/*float dt = m_orbit.calculate_period()/m_segmentPoints.size();	//Time interval
 
 	pair<rg_Point3D, rg_Point3D> lineSegment;
