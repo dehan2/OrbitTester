@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -116,10 +116,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\cppOrbitTools\orbitTools\core;..\..\cppOrbitTools\orbitTools\orbit;..\..\dev_vdrc\src\V\VUFS\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\COOP_master\COOPLib\orbitTools\core;..\..\COOP_master\COOPLib\orbitTools\orbit;..\..\COOP_master\dev_vdrc\src\V\VUFS\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,10 +133,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\cppOrbitTools\orbitTools\core;..\..\cppOrbitTools\orbitTools\orbit;..\..\dev_vdrc\src\V\VUFS\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\COOP_master\COOPLib\orbitTools\core;..\..\COOP_master\COOPLib\orbitTools\orbit;..\..\COOP_master\dev_vdrc\src\V\VUFS\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,23 +147,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="OrbitalBall.cpp" />
-    <ClCompile Include="OrbitTester.cpp" />
-    <ClCompile Include="RSOManager.cpp" />
+    <ClCompile Include="COOPManager.cpp" />
+    <ClCompile Include="MinimalRSO.cpp" />
+    <ClCompile Include="sgp4ext.cpp" />
+    <ClCompile Include="sgp4unit.cpp" />
+    <ClCompile Include="test_exp210406.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="constForDVDCOOP.h" />
-    <ClInclude Include="OrbitalBall.h" />
-    <ClInclude Include="RSOManager.h" />
+    <ClInclude Include="constForCOOP.h" />
+    <ClInclude Include="COOPManager.h" />
+    <ClInclude Include="MinimalRSO.h" />
+    <ClInclude Include="sgp4ext.h" />
+    <ClInclude Include="sgp4unit.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\cppOrbitTools\orbitTools\core\core.vcxproj">
+    <ProjectReference Include="..\..\COOP_master\COOPLib\orbitTools\core\core.vcxproj">
       <Project>{f3067b0d-4f1e-457a-ae9c-aab6ccd5c1a3}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\cppOrbitTools\orbitTools\orbit\orbit.vcxproj">
+    <ProjectReference Include="..\..\COOP_master\COOPLib\orbitTools\orbit\orbit.vcxproj">
       <Project>{e7d39150-d44f-426d-b0e2-5acfa19042de}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\dev_vdrc\VUFS\VUFS.vcxproj">
+    <ProjectReference Include="..\..\COOP_master\dev_vdrc\VUFS\VUFS.vcxproj">
       <Project>{3913760f-393e-42c3-93f0-1cf973768670}</Project>
     </ProjectReference>
   </ItemGroup>

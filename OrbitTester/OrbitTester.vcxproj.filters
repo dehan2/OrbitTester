@@ -15,24 +15,36 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="OrbitTester.cpp">
+    <ClCompile Include="sgp4unit.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="OrbitalBall.cpp">
+    <ClCompile Include="sgp4ext.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="RSOManager.cpp">
+    <ClCompile Include="COOPManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MinimalRSO.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="test_exp210406.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="OrbitalBall.h">
+    <ClInclude Include="sgp4ext.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="RSOManager.h">
+    <ClInclude Include="sgp4unit.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="constForDVDCOOP.h">
+    <ClInclude Include="constForCOOP.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="COOPManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MinimalRSO.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

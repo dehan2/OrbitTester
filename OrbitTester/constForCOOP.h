@@ -2,11 +2,15 @@
 
 #include <ctime>
 #include <cwchar>
+#include <list>
+#include <array>
 #include "coreLib.h"
 #include "orbitLib.h"
+#include "sgp4ext.h"
+#include "sgp4unit.h"
 
 #define DISABLE_COLLISION
-#define CHECK_TLE
+//#define CHECK_TLE
 
 //enum ORBIT_SOURCE_TYPE { NONE, TLE };
 
@@ -65,4 +69,50 @@ struct PredictionCommand
 	string directory, tleFile;
 	int numObject, numLineSegments, predictionTimeWindow;
 	int year, month, day, hour, min, sec;
+};
+
+
+//SGP4_06 Parameters
+// opsmode = 'a' best understanding of how afspc code works, 'i' imporved sgp4 resulting in smoother behavior
+// GRAV_CONST_TYPE = wgs72old / wgs72 / wgs84;
+
+//SGP4_06 Parameters
+const char OPS_MODE = 'i';
+const char TYPE_RUN = 'm';
+const char TYPE_INPUT = 'e';
+const gravconsttype GRAV_CONST_TYPE = wgs84;
+
+const bool FILTER_DATA = true;
+
+//const int TEMPORAL_SCALE = 10;
+
+const int TIME_FRAGMENT_SCALE = 1e3;
+const double REVERSE_TIME_FRAGMENT_SCALE = 1e-3;
+
+struct TLEFileInfo
+{
+	elsetrec SGP4_06Info;
+	cSatellite SGP4_80Info;
+};
+
+
+struct OutlierInfo
+{
+	int ID;
+	int primary;
+	int secondary;
+	int year, mon, day, hour, min;
+	float sec, distance;
+	string tag;
+};
+
+
+
+struct ErrorAnalysisReport
+{
+	int ID;
+	string satName;
+	float eccentricity;
+	float perigee;
+	array<float, 10> errors;
 };
