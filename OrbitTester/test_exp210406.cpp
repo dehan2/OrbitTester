@@ -15,36 +15,41 @@ int main()
 	manager.read_TLE_file(manager.get_prediction_command().directory + manager.get_prediction_command().tleFile, 0);
 	manager.initialize_minimal_RSOs();
 
-	/*const MinimalRSO* targetRSO1 = manager.find_RSO_from_catalog_ID(467);
-	const MinimalRSO* targetRSO2 = manager.find_RSO_from_catalog_ID(404);
-	const MinimalRSO* targetRSO3 = manager.find_RSO_from_catalog_ID(336);
-
-	list<double> errors1 = targetRSO1->calculate_linear_approx_error_in_a_period_for_given_resolution(100, 5);
-	MinimalRSO::sort_list_to_start_from_minimum(errors1);
-	
-	list<double> errors2 = targetRSO2->calculate_linear_approx_error_in_a_period_for_given_resolution(100, 5);
-	MinimalRSO::sort_list_to_start_from_minimum(errors2);
-
-	list<double> errors3 = targetRSO3->calculate_linear_approx_error_in_a_period_for_given_resolution(100, 5);
-	MinimalRSO::sort_list_to_start_from_minimum(errors3);
-	
-	cout << "Err1: [ ";
-	for (auto& err : errors1)
-		cout << err << " ";
-	cout << "]" << endl;
-
-	cout << "Err2: [ ";
-	for (auto& err : errors2)
-		cout << err << " ";
-	cout << "]" << endl;
-
-	cout << "Err1: [ ";
-	for (auto& err : errors3)
-		cout << err << " ";
-	cout << "]" << endl;*/
+	const MinimalRSO* primary = manager.find_RSO_from_catalog_ID(11);
+	const MinimalRSO* secondary = manager.find_RSO_from_catalog_ID(19275);
 
 
-	list<ErrorAnalysisReport> errorReports;
+
+	/*array<int, 10> targetIDs = { 25874, 558, 31019, 39227, 4597, 3669, 44750, 39069, 43379, 43209 };
+
+	for (int i = 0; i < 10; i++)
+	{
+		const MinimalRSO* targetRSO = manager.find_RSO_from_catalog_ID(targetIDs.at(i));
+		cout << "Target RSO: " << targetRSO->get_ID() << endl;
+
+		ofstream fout("ErrorReport_" + to_string(targetIDs.at(i)) + ".txt");
+
+		for (int i = 0; i < 10; i++)
+		{
+			int resolution = 100 * (i + 1);
+
+			list<double> errors = targetRSO->calculate_linear_approx_error_in_a_period_for_given_resolution(resolution, 5);
+			MinimalRSO::sort_list_to_start_from_minimum(errors);
+			
+			fout << resolution << "\t";
+			for (int j = 0; j < 100; j++)
+			{
+				double& error = *next(errors.begin(), (i + 1) * j);
+				fout << error << "\t";
+			}
+			fout << "\n";
+		}
+
+		fout.close();
+	}*/
+
+
+	/*list<ErrorAnalysisReport> errorReports;
 	for (auto& rso : manager.get_RSOs())
 	{
 		if (errorReports.size() % 100 == 0)
@@ -74,14 +79,10 @@ int main()
 				currReport.errors.at(i) = -1;
 			}
 		}
-
-		/*cout << "Errors: [";
-		for (int i = 0; i < 10; i++)
-		{
-			cout << " " << currReport.errors.at(i);
-		}
-		cout << "]" << endl;*/
 	}
+
+
+
 
 	ofstream fout("MaxErrors.txt");
 	fout << "ID\tName\tEccentricity\tPerigee\tRes_100\tRes_200\tRes_300\tRes_400\tRes_500\tRes_600\tRes_700\tRes_800\tRes_900\tRes_1000\n";
@@ -94,7 +95,7 @@ int main()
 		}
 		fout << "\n";
 	}
-	fout.close();
+	fout.close();*/
 
 
 	cout << "Computation end" << endl;

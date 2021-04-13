@@ -92,15 +92,6 @@ rg_Point3D MinimalRSO::calculate_point_on_Kepler_orbit_at_time(const double& tim
 
 void MinimalRSO::sort_list_to_start_from_minimum(list<double>& listToSort)
 {
-	//for test
-	cout << "List before sort: [";
-	for (auto& value : listToSort)
-	{
-		cout << value << " ";
-	}
-	cout << "]" << endl;
-
-
 	auto itForMinimum = listToSort.begin();
 
 	auto it = listToSort.begin();
@@ -112,14 +103,5 @@ void MinimalRSO::sort_list_to_start_from_minimum(list<double>& listToSort)
 		it++;
 	}
 
-	cout << "Minimum value: " << *itForMinimum << endl;
-
 	listToSort.splice(listToSort.end(), listToSort, listToSort.begin(), itForMinimum);
-
-	cout << "List after sort: [";
-	for (auto& value : listToSort)
-	{
-		cout << value << " ";
-	}
-	cout << "]" << endl;
 }
