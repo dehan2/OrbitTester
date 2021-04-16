@@ -17,10 +17,25 @@ list<double> MinimalRSO::calculate_linear_approx_error_in_a_period_for_given_res
 	list<double> maxErrorsAtSegment;
 	double period = m_TLEInfo->SGP4_80Info.Orbit().Period();
 
+	int apogeeIndex = 0;
+	double farthestDistance = 0;
 	for (int i = 0; i < resolution; i++)
 	{
-		double segmentStartTime = period / resolution * i;
-		double segmentEndTime = period / resolution * (i+1);
+		double time = period / resolution * i;
+		rg_Point3D coord = calculate_point_on_Kepler_orbit_at_time(time);
+		if (coord.magnitude() > farthestDistance)
+		{
+			apogeeIndex = i;
+			farthestDistance = coord.magnitude();
+		}	
+	}
+
+
+
+	for (int i = 0; i < resolution; i++)
+	{
+		double segmentStartTime = period / resolution * (i+apogeeIndex);
+		double segmentEndTime = period / resolution * (i+1 + apogeeIndex);
 
 		rg_Point3D RSOCoordAtStart = calculate_point_on_Kepler_orbit_at_time(segmentStartTime);
 		rg_Point3D RSOCoordAtEnd = calculate_point_on_Kepler_orbit_at_time(segmentEndTime);
@@ -67,26 +82,25 @@ rg_Point3D MinimalRSO::calculate_point_on_Kepler_orbit_at_time(const double& tim
 	cJulian targetTime = *m_COOPEpoch;
 	targetTime.AddSec(time);
 
-	double minFromSatEpochToCOOPEpoch = (targetTime.Date() - m_TLEInfo->SGP4_06Info.jdsatepoch) * 1440;
-	
-	double epoch_80 = m_TLEInfo->SGP4_80Info.Orbit().Epoch().Date();
-	double epoch_06 = m_TLEInfo->SGP4_06Info.jdsatepoch;
+	return calculate_point_on_Kepler_orbit_at_time(targetTime);
+}
 
-	
-	if(minFromSatEpochToCOOPEpoch < 0)
-		return rg_Point3D();
 
+
+
+rg_Point3D MinimalRSO::calculate_point_on_Kepler_orbit_at_time(const cJulian& time) const
+{
+	double minFromSatEpochToCOOPEpoch = (time.Date() - m_TLEInfo->SGP4_06Info.jdsatepoch) * 1440;
 
 	double coord[3];
 	double velocity[3];
 	bool result = sgp4(GRAV_CONST_TYPE, m_TLEInfo->SGP4_06Info, minFromSatEpochToCOOPEpoch, coord, velocity);
 
-	if(result)
+	if (result)
 		return rg_Point3D(coord[0], coord[1], coord[2]);
 	else
 		return rg_Point3D();
 }
-
 
 
 

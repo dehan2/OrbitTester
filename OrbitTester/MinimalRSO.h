@@ -25,6 +25,7 @@ public:
 
 	list<double> calculate_linear_approx_error_in_a_period_for_given_resolution(const int& resolution, const int& numSamplesInSegment) const;
 	rg_Point3D calculate_point_on_Kepler_orbit_at_time(const double& time) const;
+	rg_Point3D calculate_point_on_Kepler_orbit_at_time(const cJulian& time) const;
 
 	static void sort_list_to_start_from_minimum(list<double>& listToSort);
 };

@@ -116,3 +116,18 @@ struct ErrorAnalysisReport
 	float perigee;
 	array<float, 10> errors;
 };
+
+
+
+
+
+//Conjunction Category parameter
+const int RSO1_prg = 500;
+const int RSO2_prg = 750;
+const int RSO3_prg = 1200;
+
+const double RSO21_ecc = 0.0015;
+const double RSO22_ecc = 0.008;
+
+const double RSO31_ecc = 0.003;
+const double RSO32_ecc = 0.009;
