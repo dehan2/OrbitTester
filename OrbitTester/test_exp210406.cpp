@@ -5,6 +5,7 @@
 #include <list>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -14,6 +15,36 @@ int main()
 	manager.read_prediction_command_file("..\\PredictionCommand.txt");
 	manager.read_TLE_file(manager.get_prediction_command().directory + manager.get_prediction_command().tleFile, 0);
 	manager.initialize_minimal_RSOs();
+
+	list<MissedEntity> missedEntities;
+	ifstream fin("Missed.txt");
+
+	if (fin.is_open())
+	{
+		string line;
+		while (getline(fin, line))
+		{
+			missedEntities.push_back(MissedEntity());
+			MissedEntity& entity = missedEntities.back();
+
+			istringstream iss(line);
+			iss >> entity.primaryID >> entity.secondaryID >> entity.DCA_COOP >> entity.TCA_COOP >> entity.DCA_STK >> entity.TCA_STK >> entity.timeStr;
+		}
+	}
+	fin.close();
+
+	for (auto& entity : missedEntities)
+	{
+		const MinimalRSO* primary = manager.find_RSO_from_catalog_ID(entity.primaryID);
+		const MinimalRSO* secondary = manager.find_RSO_from_catalog_ID(entity.secondaryID);
+
+		rg_Point3D coord1 = primary->calculate_point_on_Kepler_orbit_at_time(entity.TCA_STK);
+		rg_Point3D coord2 = secondary->calculate_point_on_Kepler_orbit_at_time(entity.TCA_STK);
+		double distance = coord1.distance(coord2);
+
+		cout << "[" << entity.primaryID << ", " << entity.secondaryID << "] - COOP: [" << entity.DCA_COOP << ", " << entity.TCA_COOP << "], STK: [" << entity.DCA_STK << ", " << entity.TCA_STK << "], found distance: " << distance << endl;
+	}
+
 
 	/*ofstream fout("Category.txt");
 
@@ -68,7 +99,7 @@ int main()
 
 
 
-	array<int, 10> targetIDs = { 25874, 37781, 45839, 39227, 1778, 3669, 44750, 39069, 43379, 43209 };
+	/*array<int, 10> targetIDs = { 25874, 37781, 45839, 39227, 1778, 3669, 44750, 39069, 43379, 43209 };
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -92,7 +123,7 @@ int main()
 		}
 
 		fout.close();
-	}
+	}*/
 
 
 

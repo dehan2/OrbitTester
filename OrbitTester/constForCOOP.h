@@ -118,6 +118,16 @@ struct ErrorAnalysisReport
 };
 
 
+struct MissedEntity
+{
+	int primaryID;
+	int secondaryID;
+	double DCA_COOP;
+	double TCA_COOP;
+	double DCA_STK;
+	double TCA_STK;
+	string timeStr;
+};
 
 
 
