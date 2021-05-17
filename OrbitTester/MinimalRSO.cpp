@@ -1,7 +1,8 @@
 #include "MinimalRSO.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include "globals.h"
 #include <iostream>
-
-
 
 MinimalRSO::MinimalRSO(const int& ID, TLEFileInfo* TLEInfo, cJulian* COOPEpoch)
 {
@@ -101,6 +102,42 @@ rg_Point3D MinimalRSO::calculate_point_on_Kepler_orbit_at_time(const cJulian& ti
 	else
 		return rg_Point3D();
 }
+
+
+
+
+
+double MinimalRSO::predict_maximum_error(const int& resolution, const int& errorOrder, const bool& useSameR) const
+{
+	float meanAnomaly = M_PI / resolution;
+	
+	float eccentricity = m_TLEInfo->SGP4_80Info.Orbit().Eccentricity();
+
+	//The transformation from mean anomaly to true anomaly is cited from https://en.wikipedia.org/wiki/True_anomaly#cite_note-2
+
+	float trueAnomaly = meanAnomaly;
+	if (errorOrder >= 1)
+		trueAnomaly += 2 * eccentricity * sin(meanAnomaly);
+	if (errorOrder >= 2)
+		trueAnomaly += 1.25 * pow(eccentricity, 2) * sin(2*meanAnomaly);
+	if (errorOrder >= 3)
+		trueAnomaly += pow(eccentricity, 3) * (13 / 12 * sin(3 * meanAnomaly) - 0.25 * sin(meanAnomaly));
+
+	float perigee = m_TLEInfo->SGP4_80Info.Orbit().Perigee() + XKMPER_WGS72;
+
+	float semiMajor = m_TLEInfo->SGP4_80Info.Orbit().SemiMajor()* XKMPER_WGS72;
+	float rAtStart = semiMajor * (1 - pow(eccentricity, 2)) / (1 + eccentricity * cos(trueAnomaly));
+
+	float predictedMaxError = perigee - rAtStart * cos(trueAnomaly);
+
+	if (useSameR == true)
+		predictedMaxError = perigee * (1- cos(trueAnomaly));
+
+	return predictedMaxError;
+}
+
+
+
 
 
 

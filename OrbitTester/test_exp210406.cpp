@@ -16,7 +16,7 @@ int main()
 	manager.read_TLE_file(manager.get_prediction_command().directory + manager.get_prediction_command().tleFile, 0);
 	manager.initialize_minimal_RSOs();
 
-	list<MissedEntity> missedEntities;
+	/*list<MissedEntity> missedEntities;
 	ifstream fin("Missed.txt");
 
 	if (fin.is_open())
@@ -43,7 +43,7 @@ int main()
 		double distance = coord1.distance(coord2);
 
 		cout << "[" << entity.primaryID << ", " << entity.secondaryID << "] - COOP: [" << entity.DCA_COOP << ", " << entity.TCA_COOP << "], STK: [" << entity.DCA_STK << ", " << entity.TCA_STK << "], found distance: " << distance << endl;
-	}
+	}*/
 
 
 	/*ofstream fout("Category.txt");
@@ -153,55 +153,64 @@ int main()
 		fout.close();
 	}*/
 
-
-	/*list<ErrorAnalysisReport> errorReports;
-	for (auto& rso : manager.get_RSOs())
+	for (int r = 0; r < 10; r++)
 	{
-		if (errorReports.size() % 100 == 0)
-			cout << "RSO[" << errorReports.size() << "]: " << rso.get_ID()<<endl;
+		int resolution = (r + 1) * 100;
+		cout << "Resolution: " << resolution << endl;
 
-		errorReports.push_back(ErrorAnalysisReport());
-		ErrorAnalysisReport& currReport = errorReports.back();
-		currReport.ID = rso.get_ID();
-		currReport.satName = rso.get_TLE_info()->SGP4_80Info.Orbit().SatName();
-		currReport.eccentricity = rso.get_TLE_info()->SGP4_80Info.Orbit().Eccentricity();
-		currReport.perigee = rso.get_TLE_info()->SGP4_80Info.Orbit().Perigee();
-
-		for (int i = 0; i < 10; i++)
+		list<ErrorAnalysisReport> errorReports;
+		for (auto& rso : manager.get_RSOs())
 		{
-			int resolution = 100 * (i + 1);
+			if (errorReports.size() % 100 == 0)
+				cout << "RSO[" << errorReports.size() << "]: " << rso.get_ID() << endl;
 
-			list<double> errors = rso.calculate_linear_approx_error_in_a_period_for_given_resolution(resolution, 5);
+			errorReports.push_back(ErrorAnalysisReport());
+			ErrorAnalysisReport& currReport = errorReports.back();
+			currReport.ID = rso.get_ID();
+			currReport.satName = rso.get_TLE_info()->SGP4_80Info.Orbit().SatName();
+			currReport.eccentricity = rso.get_TLE_info()->SGP4_80Info.Orbit().Eccentricity();
+			currReport.perigee = rso.get_TLE_info()->SGP4_80Info.Orbit().Perigee();
+
+			list<double> errors = rso.calculate_linear_approx_error_in_a_period_for_given_resolution(resolution, 10);
 
 			if (errors.size() == resolution)
 			{
 				errors.sort();
 				double maxError = errors.back();
-				currReport.errors.at(i) = maxError;
+				currReport.errors.at(0) = maxError;
 			}
 			else
 			{
-				currReport.errors.at(i) = -1;
+				currReport.errors.at(0) = -1;
+			}
+
+			for (int i = 0; i < 4; i++)
+			{
+				double predictedError = rso.predict_maximum_error(resolution, i);
+				currReport.errors.at(i + 1) = predictedError;
 			}
 		}
-	}
 
 
 
-
-	ofstream fout("MaxErrors.txt");
-	fout << "ID\tName\tEccentricity\tPerigee\tRes_100\tRes_200\tRes_300\tRes_400\tRes_500\tRes_600\tRes_700\tRes_800\tRes_900\tRes_1000\n";
-	for (auto& report : errorReports)
-	{
-		fout << report.ID << "\t" << report.satName << "\t" << report.eccentricity << "\t" << report.perigee;
-		for (int i = 0; i < 10; i++)
+		string fileName = string("MaxErrors_") + to_string(resolution) + string(".txt");
+		ofstream fout(fileName);
+		fout << "ID\tName\tEccentricity\tPerigee\tMaxError\tPre_0\tPre_1\tPre_2\tPre_3\n";
+		for (auto& report : errorReports)
 		{
-			fout << "\t" << report.errors.at(i);
+			fout << report.ID << "\t" << report.satName << "\t" << report.eccentricity << "\t" << report.perigee;
+			/*for (int i = 0; i < 10; i++)
+			{
+				fout << "\t" << report.errors.at(i);
+			}*/
+			for (int i = 0; i < 5; i++)
+			{
+				fout << "\t" << report.errors.at(i);
+			}
+			fout << "\n";
 		}
-		fout << "\n";
+		fout.close();
 	}
-	fout.close();*/
-
 
 	cout << "Computation end" << endl;
 }

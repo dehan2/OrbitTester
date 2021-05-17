@@ -8,6 +8,7 @@
 #include "orbitLib.h"
 #include "sgp4ext.h"
 #include "sgp4unit.h"
+#include "rg_Point3D.h"
 
 #define DISABLE_COLLISION
 //#define CHECK_TLE
@@ -114,7 +115,7 @@ struct ErrorAnalysisReport
 	string satName;
 	float eccentricity;
 	float perigee;
-	array<float, 10> errors;
+	array<float, 5> errors;
 };
 
 
@@ -127,6 +128,16 @@ struct MissedEntity
 	double DCA_STK;
 	double TCA_STK;
 	string timeStr;
+};
+
+
+
+struct RSOCoords
+{
+	rg_Point3D coord;
+	rg_Point3D velocity;
+	int year, mon, day, hour, min;
+	float sec;
 };
 
 

@@ -27,6 +27,10 @@ public:
 	rg_Point3D calculate_point_on_Kepler_orbit_at_time(const double& time) const;
 	rg_Point3D calculate_point_on_Kepler_orbit_at_time(const cJulian& time) const;
 
+	double predict_maximum_error(const int& resolution, const int& errorOrder = 0, const bool& useSameR = false) const;
+
+
+
 	static void sort_list_to_start_from_minimum(list<double>& listToSort);
 };
 

@@ -1,2 +1,2 @@
 # Directory TLEFile NumObjects NumLineSeg TimeWindow EpochYear Mon Day Hour Min Sec 
-D:\google_drive\Voronoing\Thesis\Experiments\ LEO_full_16709_210321_0800UTC.tle 0 100 86400 2021 03 22 0 0 0 
+D:\Skyfire\Voronoing\Thesis\Experiments\ LEO_full_16709_210321_0800UTC.tle 0 100 86400 2021 03 22 0 0 0 
